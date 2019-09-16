@@ -1,0 +1,23 @@
+#!/bin/bash
+
+
+CMD=""
+case $1 in
+    "group")
+        if [[ ! -z $3 ]];
+        then
+            GROUP_NAME=${@:3}
+            OP=$2
+            CMD="vm.py group ${GROUP_NAME?Error group_name not set} | grep -v '/' | xargs -I % bash -c \"printf '\n' && vm.py ${OP?Error op not set} % && printf '\n'\""
+        else
+            CMD="vm.py group $2"
+        fi
+        ;;
+    *)
+        CMD="vm.py ${@:1}"
+        [ $1 == "info" ] && CMD+=" | grep --color -E '^|running|aborted|powered off'"
+        ;;
+esac
+
+#echo $CMD
+eval $CMD

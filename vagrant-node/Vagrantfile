@@ -1,0 +1,41 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'yaml'
+
+abs_path = File.expand_path(File.dirname(__FILE__))
+properties = YAML.load_file abs_path + '/vmconfig.yml'
+vm = properties['vm']
+vm_box = vm['box']
+vm_name = vm['name']
+vm_group = vm['group']
+vm_cpu = vm['cpu']
+vm_mem = vm['mem']
+vm_shared_host_src = vm['shared_host_src']
+vm_shared_vm_dst = vm['shared_vm_dst']
+
+Vagrant.configure("2") do |config|
+    config.vm.box = vm_box
+    config.vm.define vm_name
+    vb['net'].each do |key, value|
+        config.vm.network "private_network", virtualbox__hostonly: key, ip: value
+    end
+    config.vm.synced_folder vb_shared_folder_src, vb_shared_folder_dst
+
+    config.vm.provider "virtualbox" do |vb|
+        vb.customize ["modifyvm", :id, "--groups", vb_group]
+        vb.name = vb_name
+        vb.memory = vb_mem
+        vb.cpus = vb_cpu
+    end
+    config.vm.hostname = vb_name
+    vb['route'].each do |key, value|
+        config.vm.provision "add-route-#{key}", type: "shell", run: "always", privileged: true do |s|
+            s.inline = "ip route add #{key} via #{value}"
+        end
+    end
+    config.vm.provision "extra", type: "shell", run: "always", privileged: true do |s|
+        s.inline = "echo can do extra bootstrap configure now ..."
+    end
+    config.vm.provision "env", type: "shell", path: "script/env.sh", privileged: true
+end
