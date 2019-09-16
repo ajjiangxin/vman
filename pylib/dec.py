@@ -9,8 +9,8 @@ def handle(cls):
 def handlers(cls):
     cls.handle = handle
     cls.executors = {}
-    for mn in dir(cls):
-        if 'do_' in mn:
-            m = getattr(cls, mn)
-            cls.executors.update({mn.replace('do_', ''): m})
+    for n in dir(cls):
+        if n.startswith('do_'):
+            m = getattr(cls, n)
+            cls.executors.update({n.replace('do_', ''): m})
     return cls
