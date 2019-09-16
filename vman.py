@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # encoding: utf-8
 
 import os
@@ -193,10 +193,10 @@ class Base:
 
 @handlers
 class GroupCMD(Base):
-    def __init__(self, *args):
+    def __init__(self, args):
         Base.__init__(self)
-        self.cmd = self.args[0]
-        self.args = self.args[1:]
+        self.cmd = args[0]
+        self.args = args[1:]
 
     # usage: vm group all
     def do_all(self):
@@ -222,10 +222,10 @@ class GroupCMD(Base):
 
 @handlers
 class VmCMD(Base):
-    def __init__(self, *args):
+    def __init__(self, args):
         Base.__init__(self)
-        self.cmd = self.args[0]
-        self.args = self.args[1:]
+        self.cmd = args[0]
+        self.args = args[1:]
 
     # usage: vm init ${vm} ...
     def do_init(self):
@@ -313,7 +313,7 @@ if __name__ == '__main__':
     #     print(is_debug())
     #     set_debug(True)
     #     print(is_debug())
-    if 'group' is sys.argv[1]:
+    if 'group' == sys.argv[1]:
         g = GroupCMD(sys.argv[2:]).handle()
     else:
         g = VmCMD(sys.argv[1:]).handle()
