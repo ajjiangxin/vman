@@ -22,7 +22,7 @@ class Base:
         self.vagrant_global_info_keys = ['id', 'name', 'provider', 'state', 'directory']
 
     def get_vms(self):
-        if self.vms:
+        if hasattr(self, 'vms'):
             return self.vms
         list = str(os.popen("vboxmanage list vms | awk '{print $1}' | sed -r 's/\"//g'").read()).splitlines()
         list = [vm for vm in list if vm not in ['<inaccessible>']]
@@ -30,13 +30,13 @@ class Base:
         return list
 
     def get_groups(self):
-        if self.groups:
+        if hasattr(self, 'groups'):
             return self.groups
         self.groups = str(os.popen('vboxmanage list groups').read()).replace('"', '').splitlines()
         return self.groups
 
     def get_info_by_groups(self):
-        if self.info_by_groups:
+        if hasattr(self, 'info_by_groups'):
             return self.info_by_groups
         info_by_groups = {group: {} for group in self.get_groups()}
         info_by_groups['not_valid'] = {}
@@ -55,7 +55,7 @@ class Base:
         return info_by_groups
 
     def get_running_vms(self):
-        if self.running_vms:
+        if hasattr(self, 'running_vms'):
             return self.running_vms
         self.running_vms = str(os.popen("vboxmanage list runningvms | awk '{print $1}' | sed -r 's/\"//g'").read()).splitlines()
         return self.running_vms
@@ -79,7 +79,7 @@ class Base:
         return None
 
     def get_group_vm_rels(self):
-        if self.group_vm_rels:
+        if hasattr(self, 'group_vm_rels'):
             return self.group_vm_rels
         vm_group_rel = {}
         for vm in self.get_vms():
@@ -92,14 +92,14 @@ class Base:
         return self.group_vm_rels
 
     def get_systemd_vms(self):
-        if self.systemd_vms:
+        if hasattr(self, 'systemd_vms'):
             return self.systemd_vms
         self.systemd_vms = str(os.popen("sudo systemctl list-units | grep autostart_vm@ | awk '{print $1}'")
                                .read()).splitlines()
         return self.systemd_vms
 
     def get_vagrant_vms(self):
-        if self.vagrant_vms:
+        if hasattr(self, 'vagrant_vms'):
             return self.vagrant_vms
         self.vagrant_vms = {}
         with os.popen('vagrant global-status | egrep -w \'^[a-z0-9]{7} \' | awk \'{print $1" "$2}\'') as p:
@@ -109,7 +109,7 @@ class Base:
         return self.vagrant_vms
 
     def get_vagrant_global_info(self, key_by=None):
-        if not self.vagrant_global_info:
+        if not hasattr(self, 'vagrant_global_info'):
             info_start = False
             for line in read_per_line('vagrant global-status'):
                 if re.compile(r'[-]*').match(line).group():
