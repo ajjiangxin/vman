@@ -205,7 +205,7 @@ class GroupCMD(Base):
 
     # TODO usage: vm group info ${group}
     def do_info(self):
-        self.group = self.args[0]
+        self.group = '/' + self.args[0]
         print("%s:" % self.group)
         for vm, info in self.get_info_by_groups()[self.group].items():
             self.print_vm_info(2, vm, info)
@@ -213,7 +213,7 @@ class GroupCMD(Base):
 
     # TODO usage: vm group ${group}
     def do_vms(self):
-        self.group = self.args[0]
+        self.group = '/' + self.args[0]
         if self.group in self.get_group_vm_rels():
             iterate_print(0, 4 * " ", self.group, self.get_group_vm_rels()[self.group])
             print('\n')
