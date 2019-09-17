@@ -54,7 +54,8 @@ class Base:
         for r in rs:
             vm, vm_info = pickle.loads(os.read(r, 4096))
             group = vm_info['group']
-            if str(group) in self.get_groups():
+            print(group)
+            if group in self.get_groups():
                 self.info_by_groups[group][vm] = vm_info
             else:
                 self.info_by_groups['not_valid'][vm] = vm_info
