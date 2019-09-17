@@ -9,7 +9,7 @@ from pylib.proc import read_per_line, print_per_line, fork_and_run
 from pylib.transformer import str_to_dict
 from pylib.handler import Handler
 
-dir = os.path.dirname(os.path.realpath(__file__))
+script_dir = os.path.dirname(os.path.realpath(__file__))
 
 class Base:
 
@@ -76,7 +76,7 @@ class Base:
                 return vagrant_vm['id']
         return None
 
-    def get_group_vm_rels(self):
+    def __pycache__get_group_vm_rels(self):
         if hasattr(self, 'group_vm_rels'):
             return self.group_vm_rels
         self.vm_group_rel = {}
@@ -91,7 +91,7 @@ class Base:
             else:
                 self.vm_group_rel[group] = [vm]
 
-        fork_and_run(self.get_groups(), find_group_of_vm, handle_group_of_vm, bsize=512)
+        fork_and_run(self.get_vms(), find_group_of_vm, handle_group_of_vm, bsize=512)
         return self.vm_group_rel
 
     def get_systemd_vms(self):
@@ -147,13 +147,13 @@ class Base:
         info_vm['ip'] = {}
         for nic_num in range(10):
             value = str(os.popen(
-                "VBoxManage guestproperty get \"%s\" /VirtualBox/GuestInfo/Net/%s/V4/IP | awk '{ print $2 }'" % (
+                "vboxmanage guestproperty get \"%s\" /VirtualBox/GuestInfo/Net/%s/V4/IP | awk '{ print $2 }'" % (
                     vm, nic_num)).read()).strip()
             if value == 'value':
                 break
             else:
                 info_vm['ip']['NIC(%s)' % nic_num] = value
-        for line_raw in read_per_line("VBoxManage showvminfo %s" % vm):
+        for line_raw in read_per_line("vboxmanage showvminfo %s" % vm):
             if "Number of CPUs" in line_raw:
                 info_vm['hardware']['cpu'] = line_raw.split(':')[1].strip()
             if "Memory size" in line_raw:
@@ -236,7 +236,7 @@ class VMCommand(Base):
         self.vms = ['vagrant-' + name for name in self.args] if self.args else [default]
         for vm in self.vms:
             cmd = '(rm -rf %s || true ) && cp -r %s ./%s && mv ./%s/vmconfig_template.yml ./%s/vmconfig.yml'
-            os.popen(cmd % ('./' + vm, dir + '/' + default, vm, vm, vm))
+            os.popen(cmd % ('./' + vm, script_dir + '/' + default, vm, vm, vm))
 
     # usage: vm start ${vm} ...
     def do_start(self):

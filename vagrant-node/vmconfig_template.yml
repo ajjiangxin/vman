@@ -17,5 +17,5 @@ vm:
     box: bento/ubuntu-18.04
 
     # folder shared by host to vm
-    shared_host_src: /mnt/sda/vms/shared/home/ajjiangxin
+    shared_host_src: /mnt/sda/vms/shared
     shared_vm_dst: /shared
