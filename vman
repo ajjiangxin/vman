@@ -250,10 +250,10 @@ class VMGroupCommand(VMOpertion):
         self.group = '/' + self.args[0]
         if self.group in self.get_groups():
             info_by_groups = self.get_info_by_groups()
-            print(self.group)
-            for vm, info in info_by_groups[self.group].items():
-                self.print_vm_info(iter_count=2, vm=vm, info=info)
-            print("\n")
+            print(json.dumps({
+                'group': self.group,
+                'vms': info_by_groups[self.group].items()
+            }, indent=4, sort_keys=False))
         else:
             print('group:\'%s\' not found' % self.group)
 
@@ -369,7 +369,6 @@ class VMCommand(VMOpertion):
     def do_info(self):
         self.vm = self.args[0]
         if self.vm in self.get_vms():
-            # self.print_vm_info(iter_count=1, vm=self.vm)
             print(json.dumps(self.get_vm_info(self.vm), indent=4, sort_keys=False))
         else:
             print('vm:\'%s\' not found' % self.vm)
