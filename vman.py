@@ -15,7 +15,9 @@ import pickle
 dir = os.path.dirname(os.path.realpath(__file__))
 
 def print(s):
-    print(s.decode())
+    if isinstance(s, bytes):
+        print(s.decode())
+    print(s)
 
 class Base:
 
