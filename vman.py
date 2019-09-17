@@ -121,37 +121,30 @@ class Base:
                 self.vagrant_vms[items[1]] = items[0]
         return self.vagrant_vms
 
-    def get_vagrant_global_info(self, key_by=None):
-        if not hasattr(self, 'vagrant_global_info'):
-            info_start = False
-            for line in read_per_line('vagrant global-status'):
-                if re.compile(r'[-]*').match(line).group():
-                    info_start = True
-                    continue
-                if not line:
-                    break
-                if info_start:
-                    items = line.split()
-                    if items:
-                        box_info = {
-                            'id': items[0],
-                            'name': items[1],
-                            'provider': items[2],
-                            'state': items[3],
-                            'directory': items[4],
-                        }
-                        for key in ['id', 'name', 'provider', 'state', 'directory']:
-                            self.vagrant_global_info.setdefault(key, {})
-                            self.vagrant_global_info[key][box_info[key]] = box_info
-
-        key_by = self.vagrant_global_info_keys if not key_by else key_by
-        if not all(key in self.vagrant_global_info_keys for key in key_by):
-            raise Exception("key_by: %s not valid" % key_by)
-        r = {}
-        print(self.vagrant_global_info)
-        for key in key_by:
-            r.update(self.vagrant_global_info[key])
-        return r
+    def get_vagrant_global_info(self):
+        if hasattr(self, 'vagrant_global_info'):
+            return self.vagrant_global_info
+        info_start = False
+        for line in read_per_line('vagrant global-status'):
+            if re.compile(r'[-]*').match(line).group():
+                info_start = True
+                continue
+            if not line:
+                break
+            if info_start:
+                items = line.split()
+                if items:
+                    box_info = {
+                        'id': items[0],
+                        'name': items[1],
+                        'provider': items[2],
+                        'state': items[3],
+                        'directory': items[4],
+                    }
+                    for key in ['id', 'name', 'provider', 'state', 'directory']:
+                        self.vagrant_global_info.setdefault(key, {})
+                        self.vagrant_global_info[key][box_info[key]] = box_info
+        return self.vagrant_global_info
 
     def get_vm_info(self, vm):
         if vm in self.info_by_vms:
@@ -198,9 +191,9 @@ class Base:
                 mod = line_raw.split(',')[2].strip()
                 info_vm['shared_dir'].append('%s: %s <- %s' % (mod, guest_dir, host_path))
                 if "vagrant" in line_raw:
-                    v = self.get_vagrant_global_info(key_by=['name', 'directory'])
+                    v_info = self.get_vagrant_global_info() # self.get_vagrant_global_info(key_by=['name', 'directory'])
                     # 优先用vagrant目录做关联，比较靠谱，vagrant的vm_name（由vm_define定义, 默认为'default'）与virtualbox的vbox_name不一定一致
-                    info_vm['vagrant'] = v.get(host_path, v.get(vm, {}))
+                    info_vm['vagrant'] = v_info.get(host_path, v_info.get(vm, {}))
 
         self.info_by_vms[vm] = info_vm
         return self.info_by_vms[vm]
