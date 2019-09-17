@@ -189,11 +189,12 @@ class Base:
                                        key_by_value_of='name')
                 info_vm['port_forwarding'][d_key] = d
             if "Groups:" in line_raw:
-                info_vm['group'] = re.sub(r'Groups:[\s]*', b'', line_raw)
+                print(line_raw)
+                info_vm['group'] = re.sub(r'Groups:[\s]*', '', line_raw)
                 print(str(info_vm['group']))
             if "Name" in line_raw and "Host path" in line_raw:
-                guest_dir = line_raw.split(',')[0].split(':')[1].replace(b'\'', b'').strip()
-                host_path = line_raw.split(',')[1].split(':')[1].replace(b'\'', b'').strip().split()[0]
+                guest_dir = line_raw.split(',')[0].split(':')[1].replace('\'', '').strip()
+                host_path = line_raw.split(',')[1].split(':')[1].replace('\'', '').strip().split()[0]
                 mod = line_raw.split(',')[2].strip()
                 info_vm['shared_dir'].append('%s: %s <- %s' % (mod, guest_dir, host_path))
                 if "vagrant" in line_raw:
