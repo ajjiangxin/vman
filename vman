@@ -8,6 +8,7 @@ from pylib.printer import iterate_print
 from pylib.proc import read_per_line, print_per_line, fork_and_run
 from pylib.transformer import str_to_dict
 from pylib.handler import Handler
+import json
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -368,7 +369,8 @@ class VMCommand(VMOpertion):
     def do_info(self):
         self.vm = self.args[0]
         if self.vm in self.get_vms():
-            self.print_vm_info(iter_count=1, vm=self.vm)
+            # self.print_vm_info(iter_count=1, vm=self.vm)
+            print(json.dumps(self.get_vm_info(self.vm), indent=4, sort_keys=False))
         else:
             print('vm:\'%s\' not found' % self.vm)
 
