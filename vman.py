@@ -319,7 +319,7 @@ class VmCMD(Base):
             print(vm)
 
     # usage: vm running
-    def do_list_running_vms(self):
+    def do_running(self):
         for vm in self.get_running_vms():
             print(vm)
 

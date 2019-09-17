@@ -18,6 +18,7 @@ class Handler:
                 cls.h.update({n.replace('do_', ''): m})
             if hasattr(m, "route"):
                 cls.h.update({m.route: m})
+        print(cls)
         print(cls.h)
         return cls
 
