@@ -189,7 +189,7 @@ class Base:
                                        key_by_value_of='name')
                 info_vm['port_forwarding'][d_key] = d
             if "Groups:" in line_raw:
-                info_vm['group'] = re.sub(b'Groups:[\s]*', b'', line_raw)
+                info_vm['group'] = re.sub(r'Groups:[\s]*', b'', line_raw)
                 print(str(info_vm['group']))
             if "Name" in line_raw and "Host path" in line_raw:
                 guest_dir = line_raw.split(',')[0].split(':')[1].replace(b'\'', b'').strip()
