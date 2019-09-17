@@ -230,7 +230,7 @@ class GroupCMD(Base):
         self.group = '/' + self.args[0]
         if self.group in self.get_groups():
             print("%s:" % self.group)
-            print(self.get_info_by_groups()[self.group])
+            print(self.get_info_by_groups())
             # for a in self.get_info_by_groups()[self.group]:
             #     print(a)
                 # self.print_vm_info(2, vm, info)
