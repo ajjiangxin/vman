@@ -13,7 +13,11 @@ def folder_template_provider(vms):
 
 # clone a git repo to current path, which holds your vagrant template and scripts
 def git_repo_template_provider(vms):
-    raise Exception("NotImplemented")
+    default_folder_name = 'vagrant-node'
+    vms = ['vagrant-' + name for name in vms] if vms else [default_folder_name]
+    for vm in vms:
+        os.popen('git clone git@gitlab.aj:ajjiangxin/node.git && mv node %s' % vm)
+        os.popen('cd %s && cp properties_template.yml properties.yml' % vm)
 
 
 
