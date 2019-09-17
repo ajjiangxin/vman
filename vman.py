@@ -262,6 +262,8 @@ class VmCMD(Base):
                     print_per_line('vagrant up %s' % self.get_vagrant_vms()[vm])
                 else:
                     os.popen('vboxmanage startvm %s --type headless' % vm)
+        else:
+            print_per_line('vagrant up')
 
     # usage: vm stop ${vm} ...
     def do_stop(self):
