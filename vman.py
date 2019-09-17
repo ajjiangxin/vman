@@ -9,15 +9,10 @@ from pylib.env import set_debug, is_debug
 from pylib.printer import iterate_print
 from pylib.proc import read_per_line, print_per_line
 from pylib.transformer import str_to_dict
-from pylib.dec import handlers
+from pylib.dec import Handler
 import pickle
 
 dir = os.path.dirname(os.path.realpath(__file__))
-
-def print(s):
-    if isinstance(s, bytes):
-        print(s.decode())
-    print(s)
 
 class Base:
 
@@ -202,7 +197,7 @@ class Base:
         return self.info_by_vms[vm]
 
 
-@handlers
+@Handler.registerDoHandlers
 class GroupCMD(Base):
     def __init__(self, args):
         Base.__init__(self)
@@ -213,6 +208,16 @@ class GroupCMD(Base):
     def do_all(self):
         for group in self.get_groups():
             print(group)
+
+    # usage: vm group ${group}
+    @Handler.route("")
+    def list_vms(self):
+        self.group = '/' + self.args[0]
+        if self.group in self.get_group_vm_rels():
+            iterate_print(0, 4 * " ", self.group, self.get_group_vm_rels()[self.group])
+            print('\n')
+        else:
+            print('group:\'%s\' not found' % self.group)
 
     # usage: vm group info ${group}
     def do_info(self):
@@ -225,16 +230,8 @@ class GroupCMD(Base):
         else:
             print('group:\'%s\' not found' % self.group)
 
-    # usage: vm group vms ${group}
-    def do_vms(self):
-        self.group = '/' + self.args[0]
-        if self.group in self.get_group_vm_rels():
-            iterate_print(0, 4 * " ", self.group, self.get_group_vm_rels()[self.group])
-            print('\n')
-        else:
-            print('group:\'%s\' not found' % self.group)
 
-@handlers
+@Handler.registerDoHandlers
 class VmCMD(Base):
     def __init__(self, args):
         Base.__init__(self)
