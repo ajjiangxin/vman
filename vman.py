@@ -39,7 +39,7 @@ class Base:
         if hasattr(self, 'info_by_groups'):
             return self.info_by_groups
         self.info_by_groups = {group: {} for group in self.get_groups()}
-        self.info_by_groups['not_valid'] = {}
+        self.info_by_groups.update({'not_valid': {}})
         rs = []
         for vm in self.get_vms():
             r, w = os.pipe()
@@ -51,11 +51,9 @@ class Base:
                 os.write(w, pickle.dumps(p))
                 os.close(w)
                 sys.exit(0)
-        print(self.info_by_groups)
         for r in rs:
             vm, vm_info = pickle.loads(os.read(r, 4096))
             group = vm_info['group']
-            print("=>", vm, group)
             if group in self.info_by_groups:
                 self.info_by_groups[group][vm] = vm_info
             else:
@@ -229,6 +227,7 @@ class GroupCMD(Base):
 
     # usage: vm group info ${group}
     def do_info(self):
+        print("->")
         self.group = '/' + self.args[0]
         if self.group in self.get_groups():
             print("-> %s:" % self.group)
