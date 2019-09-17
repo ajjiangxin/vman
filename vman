@@ -311,7 +311,7 @@ class VMCommand(VMOpertion):
     # usage: vm init ${vm} ... => generatea a Vagrantfile (out of template) and then you can edit it yourself
     # and then do 'vagrant up' or 'vman start'
     def do_init(self):
-        init_vagrant_vms(self.args)
+        init_vagrant_vms(self.args, script_dir)
 
     # usage: vm start ${vm} ...
     def do_start(self):
