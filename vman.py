@@ -95,13 +95,11 @@ class Base:
                 os.close(w)
                 sys.exit(0)
         for r in rs:
-            p = pickle.loads(os.read(r, 1000))
-            print(p)
-            for vm, group in p:
-                if group in vm_group_rel:
-                    vm_group_rel[group].append(vm)
-                else:
-                    vm_group_rel[group] = [vm]
+            vm, group = pickle.loads(os.read(r, 1000))
+            if group in vm_group_rel:
+                vm_group_rel[group].append(vm)
+            else:
+                vm_group_rel[group] = [vm]
             os.close(r)
         self.group_vm_rels = vm_group_rel
         return self.group_vm_rels
