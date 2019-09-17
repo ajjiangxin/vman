@@ -16,7 +16,7 @@ def git_repo_template_provider(vms):
     default_folder_name = 'vagrant-node'
     vms = ['vagrant-' + name for name in vms] if vms else [default_folder_name]
     for vm in vms:
-        cmd = 'git clone git@gitlab.aj:ajjiangxin/node.git && mv node %s && cp %s/properties_template.yml %s/properties.yml'
+        cmd = 'git clone git@gitlab.aj:ajjiangxin/node.git %s && cp %s/properties_template.yml %s/properties.yml'
         os.popen(cmd % (vm, vm, vm))
 
 
