@@ -91,11 +91,11 @@ class Base:
                 rs.append(r)
             else:
                 p = (vm, self.find_group_of_vm(vm))
-                os.write(w, pickle.dumps(p).encode('base64', 'strict'))
+                os.write(w, pickle.dumps(p))
                 os.close(w)
                 sys.exit(0)
         for r in rs:
-            p = pickle.loads(os.read(r, 1000).decode('base64', 'strict'))
+            p = pickle.loads(os.read(r, 1000))
             print(p)
             for vm, group in p:
                 if group in vm_group_rel:
