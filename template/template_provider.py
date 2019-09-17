@@ -18,5 +18,5 @@ def git_repo_template_provider(vms):
 
 
 # a method to init vagrantfile on current path (where vman executes)
-default = folder_template_provider
-init_vagrant_vms = default
+default_provider = folder_template_provider
+init_vagrant_vms = default_provider

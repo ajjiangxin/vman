@@ -8,6 +8,7 @@ from pylib.printer import iterate_print
 from pylib.proc import read_per_line, print_per_line, fork_and_run
 from pylib.transformer import str_to_dict
 from pylib.handler import Handler
+from template.template_provider import init_vagrant_vms
 import json
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -307,15 +308,10 @@ class VMCommand(VMOpertion):
         self.cmd = args[0]
         self.args = args[1:]
 
-    # usage: vm init ${vm} ... => copy the (dummy) vagrant-node folder to current path,
-    # then edit the Vagrantfile yourself and do 'vagrant up' or 'vman start'
-    # TODO can be easily changed to, e.g clone a git repo to current path, which holds your vagrant template and scripts
+    # usage: vm init ${vm} ... => generatea a Vagrantfile (out of template) and then you can edit it yourself
+    # and then do 'vagrant up' or 'vman start'
     def do_init(self):
-        default = 'vagrant-node'
-        self.vms = ['vagrant-' + name for name in self.args] if self.args else [default]
-        for vm in self.vms:
-            cmd = '(rm -rf %s || true ) && cp -r %s ./%s && mv ./%s/vmconfig_template.yml ./%s/vmconfig.yml'
-            os.popen(cmd % ('./' + vm, script_dir + '/' + default, vm, vm, vm))
+        init_vagrant_vms(self.args)
 
     # usage: vm start ${vm} ...
     def do_start(self):
