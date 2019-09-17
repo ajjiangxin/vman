@@ -38,8 +38,8 @@ class Base:
     def get_info_by_groups(self):
         if hasattr(self, 'info_by_groups'):
             return self.info_by_groups
-        info_by_groups = {group: {} for group in self.get_groups()}
-        info_by_groups['not_valid'] = {}
+        self.info_by_groups = {group: {} for group in self.get_groups()}
+        self.info_by_groups['not_valid'] = {}
         rs = []
         for vm in self.get_vms():
             r, w = os.pipe()
@@ -54,13 +54,13 @@ class Base:
         for r in rs:
             vm, vm_info = pickle.loads(os.read(r, 4096))
             group = vm_info['group']
-            if group in info_by_groups:
-                info_by_groups[group][vm] = vm_info
+            if group in self.info_by_groups:
+                self.info_by_groups[group][vm] = vm_info
             else:
-                info_by_groups['not_valid'][vm] = vm_info
+                self.info_by_groups['not_valid'][vm] = vm_info
             os.close(r)
-        self.info_by_groups = info_by_groups
-        return info_by_groups
+        print(self.info_by_groups)
+        return self.info_by_groups
 
     def get_running_vms(self):
         if hasattr(self, 'running_vms'):
