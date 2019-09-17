@@ -248,9 +248,8 @@ class VmCMD(Base):
         default = 'vagrant-node'
         self.vms = ['vagrant-' + name for name in self.args] if self.args else [default]
         for vm in self.vms:
-            os.popen('rm -rf %s' % ('./' + vm))
-            os.popen('cp -r %s ./%s' % (dir + '/' + default, vm))
-            os.popen('mv ./%s/vmconfig_template.yml ./%s/vmconfig.yml' % (vm, vm))
+            cmd = '(rm -rf %s || true ) && cp -r %s ./%s && mv ./%s/vmconfig_template.yml ./%s/vmconfig.yml'
+            os.popen(cmd % ('./' + vm, dir + '/' + default, vm, vm, vm))
 
     # usage: vm start ${vm} ...
     def do_start(self):
