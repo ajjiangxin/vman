@@ -251,7 +251,7 @@ class VmCMD(Base):
         for vm in self.vms:
             os.popen('rm -rf %s' % ('./' + vm))
             os.popen('cp -r %s ./%s' % (dir + '/' + default, vm))
-            os.popen('cd ./%s && mv vmconfig_template.yml vmconfig.yml' % vm)
+            os.popen('cd %s && mv vmconfig_template.yml vmconfig.yml' % vm)
 
     # usage: vm start ${vm} ...
     def do_start(self):
