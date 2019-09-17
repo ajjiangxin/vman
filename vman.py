@@ -218,8 +218,8 @@ class GroupCMD(Base):
 
     # usage: vm group ${group}
     def do_vms(self):
+        self.group = '/' + self.args[0]
         if self.group in self.get_group_vm_rels():
-            self.group = '/' + self.args[0]
             iterate_print(0, 4 * " ", self.group, self.get_group_vm_rels()[self.group])
             print('\n')
         else:
