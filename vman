@@ -8,7 +8,6 @@ from pylib.printer import iterate_print
 from pylib.proc import read_per_line, print_per_line, fork_and_run
 from pylib.transformer import str_to_dict
 from pylib.handler import Handler
-import pickle
 
 dir = os.path.dirname(os.path.realpath(__file__))
 
