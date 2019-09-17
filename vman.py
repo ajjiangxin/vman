@@ -4,7 +4,6 @@
 import os
 import re
 import sys
-import concurrent.futures as futures
 from pylib.env import set_debug, is_debug
 from pylib.printer import iterate_print
 from pylib.proc import read_per_line, print_per_line
