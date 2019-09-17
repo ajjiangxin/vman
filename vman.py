@@ -82,12 +82,25 @@ class Base:
         if hasattr(self, 'group_vm_rels'):
             return self.group_vm_rels
         vm_group_rel = {}
+        rs = []
         for vm in self.get_vms():
-            group = self.find_group_of_vm(vm)
-            if group in vm_group_rel:
-                vm_group_rel[group].append(vm)
+            r, w = os.pipe()
+            c = os.fork()
+            if c:
+                rs.append(r)
             else:
-                vm_group_rel[group] = [vm]
+                p = (vm, self.find_group_of_vm(vm))
+                os.write(w, str(p).encode('base64', 'strict'))
+                os.close(w)
+                sys.exit(0)
+        for r in rs:
+            p = os.read(r, 1000).decode('base64', 'strict')
+            for vm, group in p:
+                if group in vm_group_rel:
+                    vm_group_rel[group].append(vm)
+                else:
+                    vm_group_rel[group] = [vm]
+            os.close(r)
         self.group_vm_rels = vm_group_rel
         return self.group_vm_rels
 
