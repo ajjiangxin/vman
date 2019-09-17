@@ -213,6 +213,7 @@ class VMOpertion(BaseInfo):
         if not str(os.popen('sudo systemctl list-units | grep vm@.serivce').read()):
             os.popen('sudo cp %s /etc/systemd/system/%s && sudo systemctl daemon-reload' %
                      (script_dir + '/systemd/vm@.service', 'vm@.service'))
+            return
 
         if op == 'enable':
             os.popen('sudo systemctl enable vm@%s' % vm)
