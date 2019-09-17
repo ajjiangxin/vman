@@ -40,17 +40,25 @@ class Base:
             return self.info_by_groups
         info_by_groups = {group: {} for group in self.get_groups()}
         info_by_groups['not_valid'] = {}
-
-        def __put_vm_to_group(vm):
-            info_vm = self.get_vm_info(vm)
-            group = info_vm['group']
-            if group in info_by_groups:
-                info_by_groups[group][vm] = info_vm
+        rs = []
+        for vm in self.get_vms():
+            r, w = os.pipe()
+            c = os.fork()
+            if c:
+                rs.append(r)
             else:
-                info_by_groups['not_valid'][vm] = info_vm
-
-        with futures.ThreadPoolExecutor(max_workers=4) as ex:
-            ex.map(__put_vm_to_group, self.get_vms())
+                p = (vm, self.get_vm_info(vm))
+                os.write(w, pickle.dumps(p))
+                os.close(w)
+                sys.exit(0)
+        for r in rs:
+            vm, vm_info = pickle.loads(os.read(r, 4096))
+            group = vm_info['group']
+            if group in info_by_groups:
+                info_by_groups[group][vm] = vm_info
+            else:
+                info_by_groups['not_valid'][vm] = vm_info
+            os.close(r)
         self.info_by_groups = info_by_groups
         return info_by_groups
 
@@ -210,8 +218,7 @@ class GroupCMD(Base):
             print(group)
 
     # usage: vm group ${group}
-    @Handler.route("")
-    def list_vms(self):
+    def do_vms(self):
         self.group = '/' + self.args[0]
         if self.group in self.get_group_vm_rels():
             iterate_print(0, 4 * " ", self.group, self.get_group_vm_rels()[self.group])
