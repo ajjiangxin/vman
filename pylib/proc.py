@@ -8,7 +8,7 @@ def read_per_line(cmd):
     while True:
         line = proc.stdout.readline()
         if line:
-            yield str(line.strip())
+            yield line.strip().decode()
         else:
             break
 
