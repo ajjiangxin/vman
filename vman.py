@@ -229,6 +229,7 @@ class GroupCMD(Base):
         self.group = '/' + self.args[0]
         if self.group in self.get_groups():
             info_by_groups = self.get_info_by_groups()
+            print(self.group)
             for vm, info in info_by_groups[self.group].items():
                 self.print_vm_info(2, vm, info)
             print("\n")
