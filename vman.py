@@ -54,7 +54,6 @@ class Base:
         for r in rs:
             vm, vm_info = pickle.loads(os.read(r, 4096))
             group = vm_info['group']
-            print(group)
             if group in self.get_groups():
                 self.info_by_groups[group][vm] = vm_info
             else:
@@ -192,6 +191,7 @@ class Base:
                 info_vm['port_forwarding'][d_key] = d
             if "Groups:" in line_raw:
                 info_vm['group'] = re.sub(r'Groups:[\s]*', '', line_raw)
+                print(info_vm['group'])
             if "Name" in line_raw and "Host path" in line_raw:
                 guest_dir = line_raw.split(',')[0].split(':')[1].replace('\'', '').strip()
                 host_path = line_raw.split(',')[1].split(':')[1].replace('\'', '').strip().split()[0]
