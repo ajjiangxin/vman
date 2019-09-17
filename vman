@@ -4,11 +4,10 @@
 import os
 import re
 import sys
-from pylib.env import set_debug, is_debug
 from pylib.printer import iterate_print
-from pylib.proc import read_per_line, print_per_line
+from pylib.proc import read_per_line, print_per_line, fork_and_run
 from pylib.transformer import str_to_dict
-from pylib.dec import Handler
+from pylib.handler import Handler
 import pickle
 
 dir = os.path.dirname(os.path.realpath(__file__))
@@ -39,25 +38,19 @@ class Base:
             return self.info_by_groups
         self.info_by_groups = {group: {} for group in self.get_groups()}
         self.info_by_groups.update({'not_valid': {}})
-        rs = []
-        for vm in self.get_vms():
-            r, w = os.pipe()
-            c = os.fork()
-            if c:
-                rs.append(r)
-            else:
-                p = (vm, self.get_vm_info(vm))
-                os.write(w, pickle.dumps(p))
-                os.close(w)
-                sys.exit(0)
-        for r in rs:
-            vm, vm_info = pickle.loads(os.read(r, 4096))
+
+        def get_vm_info(vm):
+            return (vm, self.get_vm_info(vm))
+
+        def handle_vm_info(result):
+            vm, vm_info = result
             group = vm_info['group']
             if group in self.get_groups():
                 self.info_by_groups[group][vm] = vm_info
             else:
                 self.info_by_groups['not_valid'][vm] = vm_info
-            os.close(r)
+
+        fork_and_run(self.get_vms(), get_vm_info, handle_vm_info)
         return self.info_by_groups
 
     def get_running_vms(self):
@@ -87,27 +80,20 @@ class Base:
     def get_group_vm_rels(self):
         if hasattr(self, 'group_vm_rels'):
             return self.group_vm_rels
-        vm_group_rel = {}
-        rs = []
-        for vm in self.get_vms():
-            r, w = os.pipe()
-            c = os.fork()
-            if c:
-                rs.append(r)
+        self.vm_group_rel = {}
+
+        def find_group_of_vm(vm):
+            return (vm, self.find_group_of_vm(vm))
+
+        def handle_group_of_vm(result):
+            vm, group = result
+            if group in self.vm_group_rel:
+                self.vm_group_rel[group].append(vm)
             else:
-                p = (vm, self.find_group_of_vm(vm))
-                os.write(w, pickle.dumps(p))
-                os.close(w)
-                sys.exit(0)
-        for r in rs:
-            vm, group = pickle.loads(os.read(r, 1000))
-            if group in vm_group_rel:
-                vm_group_rel[group].append(vm)
-            else:
-                vm_group_rel[group] = [vm]
-            os.close(r)
-        self.group_vm_rels = vm_group_rel
-        return self.group_vm_rels
+                self.vm_group_rel[group] = [vm]
+
+        fork_and_run(self.get_groups(), find_group_of_vm, handle_group_of_vm, bsize=512)
+        return self.vm_group_rel
 
     def get_systemd_vms(self):
         if hasattr(self, 'systemd_vms'):
@@ -202,19 +188,19 @@ class Base:
         return self.info_by_vms[vm]
 
 
-@Handler.registerDoHandlers
-class GroupCMD(Base):
+@Handler.registerDoMethods
+class VMGroupCommand(Base):
     def __init__(self, args):
         Base.__init__(self)
         self.cmd = args[0]
         self.args = args[1:]
 
-    # usage: vm group all
+    # usage: vm group all => list all groups
     def do_all(self):
         for group in self.get_groups():
             print(group)
 
-    # usage: vm group ${group}
+    # usage: vm group vms ${group} => list all vms in the group
     def do_vms(self):
         self.group = '/' + self.args[0]
         if self.group in self.get_group_vm_rels():
@@ -223,7 +209,7 @@ class GroupCMD(Base):
         else:
             print('group:\'%s\' not found' % self.group)
 
-    # usage: vm group info ${group}
+    # usage: vm group info ${group} => show info(details) of vms in the group
     def do_info(self):
         self.group = '/' + self.args[0]
         if self.group in self.get_groups():
@@ -236,14 +222,16 @@ class GroupCMD(Base):
             print('group:\'%s\' not found' % self.group)
 
 
-@Handler.registerDoHandlers
-class VmCMD(Base):
+@Handler.registerDoMethods
+class VMCommand(Base):
     def __init__(self, args):
         Base.__init__(self)
         self.cmd = args[0]
         self.args = args[1:]
 
-    # usage: vm init ${vm} ...
+    # usage: vm init ${vm} ... => copy the (dummy) vagrant-node folder to current path,
+    # then edit the Vagrantfile yourself and do 'vagrant up' or 'vman start'
+    # TODO can be easily changed to, e.g clone a git repo to current path, which holds your vagrant template and scripts
     def do_init(self):
         default = 'vagrant-node'
         self.vms = ['vagrant-' + name for name in self.args] if self.args else [default]
@@ -323,14 +311,7 @@ class VmCMD(Base):
 
 
 if __name__ == '__main__':
-    # if not str(os.popen('which vagrant').read()):
-    #     return {}
-    # if '--debug' in func_args:
-    #     func_args.remove('--debug')
-    #     print(is_debug())
-    #     set_debug(True)
-    #     print(is_debug())
     if 'group' == sys.argv[1]:
-        GroupCMD(sys.argv[2:]).handle()
+        VMGroupCommand(sys.argv[2:]).handle()
     else:
-        VmCMD(sys.argv[1:]).handle()
+        VMCommand(sys.argv[1:]).handle()

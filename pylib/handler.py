@@ -9,7 +9,7 @@ class Handler:
 
     # decorate on class to register as handler any of its methods whose name starts with 'do_'
     @staticmethod
-    def registerDoHandlers(cls):
+    def registerDoMethods(cls):
         cls.handle = Handler.handle
         cls.h = {}
         for n in dir(cls):
