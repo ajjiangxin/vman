@@ -252,7 +252,7 @@ class VMGroupCommand(VMOpertion):
             info_by_groups = self.get_info_by_groups()
             print(json.dumps({
                 'group': self.group,
-                'vms': info_by_groups[self.group].items()
+                'vms': info_by_groups[self.group]
             }, indent=4, sort_keys=False))
         else:
             print('group:\'%s\' not found' % self.group)
