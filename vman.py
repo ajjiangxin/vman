@@ -334,6 +334,8 @@ if __name__ == '__main__':
     #     set_debug(True)
     #     print(is_debug())
     if 'group' == sys.argv[1]:
-        g = GroupCMD(sys.argv[2:]).handle()
+        print("= group ", sys.argv[2:])
+        GroupCMD(sys.argv[2:]).handle()
     else:
-        g = VmCMD(sys.argv[1:]).handle()
+        print("!= group ", sys.argv[1:])
+        VmCMD(sys.argv[1:]).handle()
