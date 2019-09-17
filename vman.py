@@ -148,6 +148,7 @@ class Base:
         if not all(key in self.vagrant_global_info_keys for key in key_by):
             raise Exception("key_by: %s not valid" % key_by)
         r = {}
+        print(self.vagrant_global_info)
         for key in key_by:
             r.update(self.vagrant_global_info[key])
         return r
