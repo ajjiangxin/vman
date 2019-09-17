@@ -81,6 +81,14 @@ class Base:
             return self.group_vm_rels
         self.vm_group_rel = {}
 
+        if hasattr(self, 'info_by_groups'):
+            for group, vms in self.info_by_groups.items():
+                if group in self.vm_group_rel:
+                    self.vm_group_rel[group].extend([vm['vm'] for vm in vms])
+                else:
+                    self.vm_group_rel[group] = [vm['vm'] for vm in vms]
+            return self.vm_group_rel
+
         def find_group_of_vm(vm):
             return (vm, self.find_group_of_vm(vm))
 
