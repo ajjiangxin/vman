@@ -11,8 +11,7 @@ from pylib.handler import Handler
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
-class Base:
-
+class BaseInfo:
     def __init__(self):
         self.info_by_vms = {}
         self.vagrant_global_info = {}
@@ -194,11 +193,39 @@ class Base:
         self.info_by_vms[vm] = info_vm
         return self.info_by_vms[vm]
 
+class VMOpertion(BaseInfo):
+    def __init__(self):
+        BaseInfo.__init__(self)
+
+    def op_vm(self, vm, op):
+        if vm in self.get_vagrant_vms():
+            if op == 'start':
+                print_per_line('vagrant up %s' % self.get_vagrant_vms()[vm])
+            elif op == 'stop':
+                print_per_line('vagrant halt %s' % self.get_vagrant_vms()[vm])
+        else:
+            if op == 'start':
+                os.popen('vboxmanage startvm %s --type headless' % vm)
+            elif op == 'stop':
+                os.popen('vboxmanage controlvm %s poweroff' % vm)
+
+    def op_autostart_vm(self, vm, op):
+        if not str(os.popen('sudo systemctl list-units | grep vm@.serivce').read()):
+            os.popen('sudo cp %s /etc/systemd/system/%s && sudo systemctl daemon-reload' %
+                     (script_dir + '/systemd/vm@.service', 'vm@.service'))
+
+        if op == 'enable':
+            os.popen('sudo systemctl enable vm@%s' % vm)
+            return
+
+        if op == 'disable':
+            os.popen('sudo systemctl disable vm@%s' % vm)
+            return
 
 @Handler.registerDoMethods
-class VMGroupCommand(Base):
+class VMGroupCommand(VMOpertion):
     def __init__(self, args):
-        Base.__init__(self)
+        BaseInfo.__init__(self)
         self.cmd = args[0]
         self.args = args[1:]
 
@@ -210,7 +237,7 @@ class VMGroupCommand(Base):
     # usage: vm group vms ${group} => list all vms in the group
     def do_vms(self):
         self.group = '/' + self.args[0]
-        if self.group in self.get_group_vm_rels():
+        if self.group in self.get_groups():
             iterate_print(0, 4 * " ", self.group, self.get_group_vm_rels()[self.group])
             print('\n')
         else:
@@ -223,16 +250,56 @@ class VMGroupCommand(Base):
             info_by_groups = self.get_info_by_groups()
             print(self.group)
             for vm, info in info_by_groups[self.group].items():
-                self.print_vm_info(2, vm, info)
+                self.print_vm_info(iter_count=2, vm=vm, info=info)
             print("\n")
+        else:
+            print('group:\'%s\' not found' % self.group)
+
+    # usage: vm group start ${group} => start all vms in the group
+    def do_start(self):
+        self.group = '/' + self.args[0]
+        if self.group in self.get_groups():
+            args = ['start']
+            args.extend(self.get_group_vm_rels()[self.group])
+            VMCommand(args).handle()
+        else:
+            print('group:\'%s\' not found' % self.group)
+
+    # usage: vm group stop => ...
+    def do_stop(self):
+        self.group = '/' + self.args[0]
+        if self.group in self.get_groups():
+            args = ['stop']
+            args.extend(self.get_group_vm_rels()[self.group])
+            VMCommand(args).handle()
+        else:
+            print('group:\'%s\' not found' % self.group)
+
+    # usage: vm group enable ${group} ...
+    def do_enable(self):
+        self.group = '/' + self.args[0]
+        if self.group in self.get_groups():
+            args = ['enable']
+            args.extend(self.get_group_vm_rels()[self.group])
+            VMCommand(args).handle()
+        else:
+            print('group:\'%s\' not found' % self.group)
+
+    # usage: vm group disable ${group} ...
+    def do_disable(self):
+        self.group = '/' + self.args[0]
+        if self.group in self.get_groups():
+            args = ['disable']
+            args.extend(self.get_group_vm_rels()[self.group])
+            VMCommand(args).handle()
         else:
             print('group:\'%s\' not found' % self.group)
 
 
 @Handler.registerDoMethods
-class VMCommand(Base):
+class VMCommand(VMOpertion):
     def __init__(self, args):
-        Base.__init__(self)
+        BaseInfo.__init__(self)
         self.cmd = args[0]
         self.args = args[1:]
 
@@ -249,38 +316,37 @@ class VMCommand(Base):
     # usage: vm start ${vm} ...
     def do_start(self):
         self.vms = self.args
+        if not self.vms:
+            print_per_line('vagrant up')
+            return
         for vm in self.vms:
             if vm in self.get_vms():
-                if vm in self.get_vagrant_vms():
-                    print_per_line('vagrant up %s' % self.get_vagrant_vms()[vm])
-                else:
-                    os.popen('vboxmanage startvm %s --type headless' % vm)
-        else:
-            print_per_line('vagrant up')
+                self.op_vm(vm, 'start')
+            else:
+                print('vm:\'%s\' not found' % self.vm)
 
     # usage: vm stop ${vm} ...
     def do_stop(self):
         self.vms = self.args
         for vm in self.vms:
             if vm in self.get_vms():
-                if vm in self.get_vagrant_vms():
-                    print_per_line('vagrant halt %s' % self.get_vagrant_vms()[vm])
-                else:
-                    os.popen('vboxmanage controlvm %s poweroff' % vm)
+                self.op_vm(vm, 'stop')
+            else:
+                print('vm:\'%s\' not found' % self.vm)
 
     # usage: vm enable ${vm} ...
     def do_enable(self):
         self.vms = self.args
         for vm in self.vms:
             if vm in self.get_vms():
-                os.popen('sudo systemctl enable autostart_vm@%s' % vm)
+                self.op_autostart_vm(vm, 'enable')
 
     # usage: vm disable ${vm} ...
     def do_disable(self):
         self.vms = self.args
         for vm in self.vms:
             if vm in self.get_vms():
-                os.popen('sudo systemctl disable autostart_vm@%s' % vm)
+                self.op_autostart_vm(vm, 'disable')
 
     # usage: vm rm ${vm} ...
     def do_rm(self):

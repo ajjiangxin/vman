@@ -1,0 +1,12 @@
+[Unit]
+Description=vm autostart
+After=network.target virtualbox.service
+[Service]
+Type=forking
+Restart=on-failure
+RestartSec=5
+ExecStart=/bin/bash -c "vman start %i"
+ExecStop=/bin/bash -c "vman stop %i"
+RemainAfterExit=yes
+[Install]
+WantedBy=multi-user.target
