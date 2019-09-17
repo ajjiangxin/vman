@@ -90,11 +90,11 @@ class Base:
                 rs.append(r)
             else:
                 p = (vm, self.find_group_of_vm(vm))
-                os.write(w, str(p).encode('base64', 'strict'))
+                os.write(w, str(p).encode('utf-8', 'strict'))
                 os.close(w)
                 sys.exit(0)
         for r in rs:
-            p = os.read(r, 1000).decode('base64', 'strict')
+            p = os.read(r, 1000).decode('utf-8', 'strict')
             for vm, group in p:
                 if group in vm_group_rel:
                     vm_group_rel[group].append(vm)
