@@ -14,6 +14,8 @@ import pickle
 
 dir = os.path.dirname(os.path.realpath(__file__))
 
+def print(s):
+    print(s.decode())
 
 class Base:
 
@@ -191,8 +193,7 @@ class Base:
                 mod = line_raw.split(',')[2].strip()
                 info_vm['shared_dir'].append('%s: %s <- %s' % (mod, guest_dir, host_path))
                 if "vagrant" in line_raw:
-                    v_info = self.get_vagrant_global_info() # self.get_vagrant_global_info(key_by=['name', 'directory'])
-                    # 优先用vagrant目录做关联，比较靠谱，vagrant的vm_name（由vm_define定义, 默认为'default'）与virtualbox的vbox_name不一定一致
+                    v_info = self.get_vagrant_global_info()
                     info_vm['vagrant'] = v_info.get(host_path, v_info.get(vm, {}))
 
         self.info_by_vms[vm] = info_vm
