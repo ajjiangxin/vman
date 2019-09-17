@@ -240,8 +240,10 @@ class VMGroupCommand(VMOpertion):
     def do_vms(self):
         self.group = '/' + self.args[0]
         if self.group in self.get_groups():
-            iterate_print(0, 4 * " ", self.group, self.get_group_vm_rels()[self.group])
-            print('\n')
+            print(json.dumps({
+                'group': self.group,
+                'vms': self.get_group_vm_rels()[self.group]
+            }, indent=4, sort_keys=False))
         else:
             print('group:\'%s\' not found' % self.group)
 
