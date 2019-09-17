@@ -203,18 +203,18 @@ class GroupCMD(Base):
         for group in self.get_groups():
             print(group)
 
-    # TODO usage: vm group info ${group}
+    # usage: vm group info ${group}
     def do_info(self):
         self.group = '/' + self.args[0]
-        if self.group not in self.get_groups():
+        if self.group in self.get_groups():
+            print("%s:" % self.group)
+            for vm, info in self.get_info_by_groups()[self.group].items():
+                self.print_vm_info(2, vm, info)
+            print("\n")
+        else:
             print('group:\'%s\' not found' % self.group)
-            return
-        print("%s:" % self.group)
-        for vm, info in self.get_info_by_groups()[self.group].items():
-            self.print_vm_info(2, vm, info)
-        print("\n")
 
-    # TODO usage: vm group ${group}
+    # usage: vm group vms ${group}
     def do_vms(self):
         self.group = '/' + self.args[0]
         if self.group in self.get_group_vm_rels():
