@@ -1,0 +1,4 @@
+#!/bin/bash
+
+
+eval "./vman.py ${@:1} | grep --color -E '^|running|aborted|powered off'"

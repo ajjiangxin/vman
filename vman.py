@@ -206,6 +206,9 @@ class GroupCMD(Base):
     # TODO usage: vm group info ${group}
     def do_info(self):
         self.group = '/' + self.args[0]
+        if self.group not in self.get_groups():
+            print('group:\'%s\' not found' % self.group)
+            return
         print("%s:" % self.group)
         for vm, info in self.get_info_by_groups()[self.group].items():
             self.print_vm_info(2, vm, info)
