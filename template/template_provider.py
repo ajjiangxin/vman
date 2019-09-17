@@ -17,7 +17,7 @@ def git_repo_template_provider(vms):
     vms = ['vagrant-' + name for name in vms] if vms else [default_folder_name]
     for vm in vms:
         os.popen('git clone git@gitlab.aj:ajjiangxin/node.git && mv node %s' % vm)
-        os.popen('cd %s && cp properties_template.yml properties.yml' % vm)
+        os.popen('cp %s/properties_template.yml %s/properties.yml' % (vm, vm))
 
 
 
