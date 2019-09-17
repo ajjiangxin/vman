@@ -169,7 +169,7 @@ class Base:
                 break
             else:
                 info_vm['ip']['NIC(%s)' % nic_num] = value
-        for line in read_per_line("VBoxManage showvminfo %s" % vm):
+        for line_raw in read_per_line("VBoxManage showvminfo %s" % vm):
             if "Number of CPUs" in line_raw:
                 info_vm['hardware']['cpu'] = line_raw.split(':')[1].strip()
             if "Memory size" in line_raw:
