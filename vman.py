@@ -333,6 +333,7 @@ if __name__ == '__main__':
     #     print(is_debug())
     #     set_debug(True)
     #     print(is_debug())
+    print("====")
     if 'group' == sys.argv[1]:
         print("= group ", sys.argv[2:])
         GroupCMD(sys.argv[2:]).handle()
