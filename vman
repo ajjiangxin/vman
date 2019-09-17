@@ -76,7 +76,7 @@ class Base:
                 return vagrant_vm['id']
         return None
 
-    def __pycache__get_group_vm_rels(self):
+    def get_group_vm_rels(self):
         if hasattr(self, 'group_vm_rels'):
             return self.group_vm_rels
         self.vm_group_rel = {}
