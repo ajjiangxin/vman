@@ -218,8 +218,8 @@ class GroupCMD(Base):
 
     # usage: vm group ${group}
     def do_vms(self):
-        self.group = '/' + self.args[0]
         if self.group in self.get_group_vm_rels():
+            self.group = '/' + self.args[0]
             iterate_print(0, 4 * " ", self.group, self.get_group_vm_rels()[self.group])
             print('\n')
         else:
@@ -227,10 +227,8 @@ class GroupCMD(Base):
 
     # usage: vm group info ${group}
     def do_info(self):
-        print("->")
         self.group = '/' + self.args[0]
         if self.group in self.get_groups():
-            print("-> %s:" % self.group)
             self.get_info_by_groups()
             # for a in self.get_info_by_groups()[self.group]:
             #     print(a)
@@ -333,10 +331,7 @@ if __name__ == '__main__':
     #     print(is_debug())
     #     set_debug(True)
     #     print(is_debug())
-    print("====")
     if 'group' == sys.argv[1]:
-        print("= group ", sys.argv[2:])
         GroupCMD(sys.argv[2:]).handle()
     else:
-        print("!= group ", sys.argv[1:])
         VmCMD(sys.argv[1:]).handle()
