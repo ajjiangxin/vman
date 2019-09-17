@@ -51,8 +51,8 @@ class Base:
                 os.write(w, pickle.dumps(p))
                 os.close(w)
                 sys.exit(0)
+        print(self.info_by_groups)
         for r in rs:
-            print(self.info_by_groups)
             vm, vm_info = pickle.loads(os.read(r, 4096))
             group = vm_info['group']
             print("=>", vm, group)
