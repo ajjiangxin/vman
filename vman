@@ -318,20 +318,19 @@ class VMCommand(VMOpertion):
             for vm in vms:
                 src = config['vagrant_template']['path']
                 cmd = '(rm -rf ./%s || true) && mkdir ./%s && cp %s ./%s/'
-                os.popen(cmd % (vm, vm, src, vm))
                 print(vm)
+                os.popen(cmd % (vm, vm, src, vm))
 
         elif config['vagrant_template']['type'] == 'git':
             for vm in vms:
                 repo = config['vagrant_template']['path']
                 cmd = '(rm -rf ./%s || true ) && git clone %s %s'
-                print(os.popen(cmd % (vm, repo, vm)).read())
                 print(vm)
+                print(os.popen(cmd % (vm, repo, vm)).read())
         else:
             print("vagrant_template.type: %s not recognized." % config['vagrant_template']['type'])
             exit(1)
 
-        exit(0)
 
     # usage: vm start ${vm} ...
     def do_start(self):
