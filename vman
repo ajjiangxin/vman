@@ -314,19 +314,20 @@ class VMCommand(VMOpertion):
         import uuid
         vms = ['vagrant-' + name for name in self.args] if self.args else ['vagrant-node']
         vms = ['%s-%s' % (vm, str(uuid.uuid4())[:8]) for vm in vms]
-        if ['vagrant_template']['type'] == 'file':
+        if config['vagrant_template']['type'] == 'file':
             for vm in vms:
-                src = ['vagrant_template']['path']
+                src = config['vagrant_template']['path']
                 cmd = '(rm -rf ./%s || true) && mkdir ./%s && cp %s ./%s/'
                 os.popen(cmd % (vm, vm, src, vm))
-        elif ['vagrant_template']['type'] == 'git':
+        elif config['vagrant_template']['type'] == 'git':
             for vm in vms:
-                repo = ['vagrant_template']['path']
+                repo = config['vagrant_template']['path']
                 cmd = '(rm -rf ./%s || true ) && git clone %s %s'
                 os.popen(cmd % (vm, repo, vm))
             return
         else:
-            raise Exception("vagrant_template.type: %s not recognized." % ['vagrant_template']['type'])
+            print("vagrant_template.type: %s not recognized." % config['vagrant_template']['type'])
+            exit(1)
 
     # usage: vm start ${vm} ...
     def do_start(self):
@@ -419,19 +420,24 @@ def loadConfig():
         config = json.load(file)
 
     if 'vagrant_template' not in config:
-        raise Exception("'vagrant_template' not defined in %s" % configFilePath)
+        print("'vagrant_template' not defined in %s" % configFilePath)
+        exit(1)
 
     if len(config['vagrant_template']['type']) == 0:
-        raise Exception("'vagrant_template.type' not defined in %s" % configFilePath)
+        print("'vagrant_template.type' not defined in %s" % configFilePath)
+        exit(1)
 
     if len(config['vagrant_template']['path']) == 0:
-        raise Exception("'vagrant_template.path' not defined in %s" % configFilePath)
+        print("'vagrant_template.path' not defined in %s" % configFilePath)
+        exit(1)
 
     return False
 
 if __name__ == '__main__':
     if loadConfig():
-        raise Exception("edit %s to define your vagrant template" % configFilePath)
+        print("edit %s to define your vagrant template" % configFilePath)
+        exit(0)
+
     if 'group' == sys.argv[1]:
         VMGroupCommand(sys.argv[2:]).handle()
     else:
