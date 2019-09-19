@@ -8,10 +8,12 @@ from pylib.printer import iterate_print
 from pylib.proc import read_per_line, print_per_line, fork_and_run
 from pylib.transformer import str_to_dict
 from pylib.handler import Handler
-from template.template_provider import init_vagrant_vms
 import json
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
+configFileName = '.vmanconfig.json'
+configFilePath = '%s/%s' % (os.getenv("HOME"), configFileName)
+config = {}
 
 class BaseInfo:
     def __init__(self):
@@ -308,10 +310,23 @@ class VMCommand(VMOpertion):
         self.cmd = args[0]
         self.args = args[1:]
 
-    # usage: vm init ${vm} ... => generatea a Vagrantfile (out of template) and then you can edit it yourself
-    # and then do 'vagrant up' or 'vman start'
     def do_init(self):
-        init_vagrant_vms(self.args, script_dir)
+        import uuid
+        vms = ['vagrant-' + name for name in self.args] if self.args else ['vagrant-node']
+        vms = ['%s-%s' % (vm, str(uuid.uuid4())[:8]) for vm in vms]
+        if ['vagrant_template']['type'] == 'file':
+            for vm in vms:
+                src = ['vagrant_template']['path']
+                cmd = '(rm -rf ./%s || true) && mkdir ./%s && cp %s ./%s/'
+                os.popen(cmd % (vm, vm, src, vm))
+        elif ['vagrant_template']['type'] == 'git':
+            for vm in vms:
+                repo = ['vagrant_template']['path']
+                cmd = '(rm -rf ./%s || true ) && git clone %s %s'
+                os.popen(cmd % (vm, repo, vm))
+            return
+        else:
+            raise "vagrant_template.type: %s not recognized." % ['vagrant_template']['type']
 
     # usage: vm start ${vm} ...
     def do_start(self):
@@ -382,8 +397,41 @@ class VMCommand(VMOpertion):
             print(vm)
 
 
+def loadConfig():
+    # type -> file or git
+    # path -> ${local_file_path} or git_url
+    content = \
+'''{
+    "vagrant_template": {
+        "type": "file", 
+        "path": "/var/lib/my-vagrant-templates/Vagrantfile"
+    }
+}
+'''
+    global configFilePath
+    if not os.path.exists(configFilePath):
+        with open(configFilePath, 'w') as file:
+            file.write(content)
+        return True
+
+    global config
+    with open(configFilePath, 'r') as file:
+        config = json.load(file)
+
+    if 'vagrant_template' not in config:
+        raise "'vagrant_template' not defined in %s" % configFilePath
+
+    if len(config['vagrant_template']['type']) == 0:
+        raise "'vagrant_template.type' not defined in %s" % configFilePath
+
+    if len(config['vagrant_template']['path']) == 0:
+        raise "'vagrant_template.path' not defined in %s" % configFilePath
+
+    return False
 
 if __name__ == '__main__':
+    if loadConfig():
+        raise "edit %s to define your vagrant template" % configFilePath
     if 'group' == sys.argv[1]:
         VMGroupCommand(sys.argv[2:]).handle()
     else:
