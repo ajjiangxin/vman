@@ -326,7 +326,7 @@ class VMCommand(VMOpertion):
                 repo = config['vagrant_template']['path']
                 cmd = '(rm -rf ./%s || true ) && git clone %s %s'
                 os.popen(cmd % (vm, repo, vm))
-
+                print(vm)
         else:
             print("vagrant_template.type: %s not recognized." % config['vagrant_template']['type'])
             exit(1)
